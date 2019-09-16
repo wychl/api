@@ -167,6 +167,16 @@ func (m *BucketManager) CreateBucket(bucketName string, regionID RegionID) error
 	return m.Client.Call(ctx, nil, "POST", reqURL, nil)
 }
 
+// DeleteBucket 删除一个七牛存储空间
+func (m *BucketManager) DeleteBucket(bucketName string) error {
+	ctx := auth.WithCredentials(context.Background(), m.Mac)
+	var reqHost string
+
+	reqHost = m.Cfg.RsReqHost()
+	reqURL := fmt.Sprintf("%s/drop/%s", reqHost, EncodedEntryWithoutKey(bucketName))
+	return m.Client.Call(ctx, nil, "POST", reqURL, nil)
+}
+
 // Buckets 用来获取空间列表，如果指定了 shared 参数为 true，那么一同列表被授权访问的空间
 func (m *BucketManager) Buckets(shared bool) (buckets []string, err error) {
 	ctx := auth.WithCredentials(context.Background(), m.Mac)
