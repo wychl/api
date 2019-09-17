@@ -38,7 +38,7 @@ type SpaceReq struct {
 // SpaceResp 为标准存储的当前存储量查询响应内容
 type SpaceResp struct {
 	Times []uint64 `json:"times,omitempty"`
-	Datas uint64   `json:"data,omitempty"`
+	Datas []uint64 `json:"datas,omitempty"`
 }
 
 // GetSpace 方法用来获取标准存储的当前存储量
@@ -82,7 +82,7 @@ type CountReq struct {
 // CountResp 为标准存储的当前文件数量查询响应内容
 type CountResp struct {
 	Times []uint64 `json:"times,omitempty"`
-	Datas uint64   `json:"data,omitempty"`
+	Datas []uint64 `json:"datas,omitempty"`
 }
 
 // GetCount 方法用来获取标准存储的文件数量
@@ -90,7 +90,7 @@ type CountResp struct {
 // BeginDate 	开始日期，格式例如：20060102150405
 // EndDate 	结束日期，格式例如：20060102150405
 // Granularity	取值粒度，取值可选值：5min/hour/day
-func (m *StatisticManager) GetCount(req CountLineReq) (CountData CountResp, err error) {
+func (m *StatisticManager) GetCount(req CountReq) (CountData CountResp, err error) {
 	path := fmt.Sprintf("/v6/count?bucket=%s&begin=%s&end=%s&g=%s",
 		req.Bucket,
 		req.BeginDate,
@@ -101,6 +101,7 @@ func (m *StatisticManager) GetCount(req CountLineReq) (CountData CountResp, err 
 		err = reqErr
 		return
 	}
+
 	umErr := json.Unmarshal(resData, &CountData)
 	if umErr != nil {
 		err = umErr
@@ -131,7 +132,7 @@ type SpaceLineResp struct {
 	Code  int      `json:"code"`
 	Error string   `json:"error"`
 	Times []uint64 `json:"times,omitempty"`
-	Datas uint64   `json:"data,omitempty"`
+	Datas []uint64 `json:"datas,omitempty"`
 }
 
 // GetSpaceLine 方法用来获取低频存储的当前存储量
@@ -176,7 +177,7 @@ type CountLineReq struct {
 // CountLineResp 为低频存储的当前文件数量查询响应内容
 type CountLineResp struct {
 	Times []uint64 `json:"times,omitempty"`
-	Datas uint64   `json:"data,omitempty"`
+	Datas []uint64 `json:"datas,omitempty"`
 }
 
 // GetCountLine 方法用来获取低频存储的当前文件数量
@@ -266,7 +267,7 @@ func (m *StatisticManager) GetBlobTransfer(req BlobTransferReq) (blobTransferDat
 // SelectType 值为size，表示存储量 (Byte)
 // Bucket 空间名称
 // Region 存储区域
-type RSChTypeReqferReq struct {
+type RSChTypeReq struct {
 	BeginDate   string `json:"begin_date"`
 	EndDate     string `json:"end_date"`
 	Granularity string `json:"granularity"`
@@ -275,23 +276,23 @@ type RSChTypeReqferReq struct {
 	Region      string `json:"region"`
 }
 
-// RSChTypeReqferResp 为当前存储类型转换请求次数查询响应内容
-type RSChTypeReqferResp []RSChTypeReqferData
+// RSChTypeResp 为当前存储类型转换请求次数查询响应内容
+type RSChTypeResp []RSChTypeData
 
 // 为当前存储类型转换请求次数查询响应内容
-type RSChTypeReqferData struct {
+type RSChTypeData struct {
 	Time   string `json:"time"`
 	Values struct {
 		Hits uint64 `json:"hits"`
 	} `json:"values"`
 }
 
-// GetRSChTypeReqfer 方法用来获取存储类型转换请求次数
+// GetRSChType 方法用来获取存储类型转换请求次数
 // Bucket 存储空间名称，是一个条件请求参数
 // BeginDate 开始日期，格式例如：20060102150405
 // EndDate 	结束日期，格式例如：20060102150405
 // Granularity	取值粒度，取值可选值：5min/hour/day
-func (m *StatisticManager) GetRSChTypeReqfer(req RSChTypeReqferReq) (rSChTypeReqferData RSChTypeReqferResp, err error) {
+func (m *StatisticManager) GetRSChType(req RSChTypeReq) (rSChTypeResp RSChTypeResp, err error) {
 	path := fmt.Sprintf("/v6/rs_chtype?begin=%s&end=%s&g=%s&select=%s&$bucket=%s&$region=%s",
 		req.BeginDate,
 		req.EndDate,
@@ -305,7 +306,7 @@ func (m *StatisticManager) GetRSChTypeReqfer(req RSChTypeReqferReq) (rSChTypeReq
 		return
 	}
 
-	umErr := json.Unmarshal(resData, &rSChTypeReqferData)
+	umErr := json.Unmarshal(resData, &rSChTypeResp)
 	if umErr != nil {
 		err = umErr
 		return
@@ -323,7 +324,7 @@ func (m *StatisticManager) GetRSChTypeReqfer(req RSChTypeReqferReq) (rSChTypeReq
 // Domain 空间访问域名
 // Region 存储区域
 // Src 请求涞源 origin 用户直接到源站的请求 inner 专线或内网请求 ex 专线到源站的下载请求 atlab 七牛数据处理的下载请求
-type BlobIOReqferReq struct {
+type BlobIOReq struct {
 	BeginDate   string `json:"begin_date"`
 	EndDate     string `json:"end_date"`
 	Granularity string `json:"granularity"`
@@ -335,11 +336,11 @@ type BlobIOReqferReq struct {
 	Src         string `json:"src"`
 }
 
-// BlobIOReqferResp 为当前外网流出流量统计和 GET 请求次数查询响应内容
-type BlobIOReqferResp []BlobIOReqferData
+// BlobIOReq 为当前外网流出流量统计和 GET 请求次数查询响应内容
+type BlobIOResp []BlobIOData
 
 // 为当前外网流出流量统计和 GET 请求次数查询响应内容
-type BlobIOReqferData struct {
+type BlobIOData struct {
 	Time   string `json:"time"`
 	Values struct {
 		Hits uint64 `json:"hits"`
@@ -347,12 +348,12 @@ type BlobIOReqferData struct {
 	} `json:"values"`
 }
 
-// GetBlobIOReqfer 方法用来获取外网流出流量统计和 GET 请求次数
+// GetBlobIO 方法用来获取外网流出流量统计和 GET 请求次数
 // Bucket 存储空间名称，是一个条件请求参数
 // BeginDate 开始日期，格式例如：20060102150405
 // EndDate 	结束日期，格式例如：20060102150405
 // Granularity	取值粒度，取值可选值：5min/hour/day
-func (m *StatisticManager) GetBlobIOReqfer(req BlobIOReqferReq) (blobIOReqferData BlobIOReqferResp, err error) {
+func (m *StatisticManager) GetBlobIO(req BlobIOReq) (blobIOResp BlobIOResp, err error) {
 	path := fmt.Sprintf("/v6/blob_io?begin=%s&end=%s&g=%s&select=%s&$bucket=%s&$domain=%s&$region=%s&$src=%s",
 		req.BeginDate,
 		req.EndDate,
@@ -369,11 +370,12 @@ func (m *StatisticManager) GetBlobIOReqfer(req BlobIOReqferReq) (blobIOReqferDat
 		return
 	}
 
-	umErr := json.Unmarshal(resData, &blobIOReqferData)
+	umErr := json.Unmarshal(resData, &blobIOResp)
 	if umErr != nil {
 		err = umErr
 		return
 	}
+
 	return
 }
 
@@ -385,7 +387,7 @@ func (m *StatisticManager) GetBlobIOReqfer(req BlobIOReqferReq) (blobIOReqferDat
 // Bucket 空间名称
 // FType 存储类型 0 标准存储 1 低频存储
 // Region 存储区域
-type RsPutReqferReq struct {
+type RsPutReq struct {
 	BeginDate   string `json:"begin_date"`
 	EndDate     string `json:"end_date"`
 	Granularity string `json:"granularity"`
@@ -395,23 +397,23 @@ type RsPutReqferReq struct {
 	Region      string `json:"region"`
 }
 
-// RsPutReqferResp 为当前外网流出流量统计和 GET 请求次数查询响应内容
-type RsPutReqferResp []RsPutReqferData
+// RsPutResp 为当前外网流出流量统计和 GET 请求次数查询响应内容
+type RsPutResp []RsPutData
 
 // 为当前外网流出流量统计和 GET 请求次数查询响应内容
-type RsPutReqferData struct {
+type RsPutData struct {
 	Time   string `json:"time"`
 	Values struct {
 		Hits uint64 `json:"hits"`
 	} `json:"values"`
 }
 
-// GetRsPutReqfer 方法用来获取外网流出流量统计和 GET 请求次数
+// GetRsPut 方法用来获取外网流出流量统计和 GET 请求次数
 // Bucket 存储空间名称，是一个条件请求参数
 // BeginDate 开始日期，格式例如：20060102150405
 // EndDate 	结束日期，格式例如：20060102150405
 // Granularity	取值粒度，取值可选值：5min/hour/day
-func (m *StatisticManager) GetRsPutReqfer(req RsPutReqferReq) (rsPutReqferData RsPutReqferResp, err error) {
+func (m *StatisticManager) GetRsPut(req RsPutReq) (rsPutResp RsPutResp, err error) {
 	path := fmt.Sprintf("/v6/rs_put?begin=%s&end=%s&g=%s&select=%s&$bucket=%s&$region=%s",
 		req.BeginDate,
 		req.EndDate,
@@ -426,7 +428,7 @@ func (m *StatisticManager) GetRsPutReqfer(req RsPutReqferReq) (rsPutReqferData R
 		return
 	}
 
-	umErr := json.Unmarshal(resData, &rsPutReqferData)
+	umErr := json.Unmarshal(resData, &rsPutResp)
 	if umErr != nil {
 		err = umErr
 		return
@@ -436,7 +438,7 @@ func (m *StatisticManager) GetRsPutReqfer(req RsPutReqferReq) (rsPutReqferData R
 
 func getRequest(mac *auth.Credentials, path string) (resData []byte,
 	err error) {
-	urlStr := fmt.Sprintf("%s%s", DefaultAPIHost, path)
+	urlStr := fmt.Sprintf("https://%s%s", DefaultAPIHost, path)
 	req, reqErr := http.NewRequest("POST", urlStr, nil)
 	if reqErr != nil {
 		err = reqErr

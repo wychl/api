@@ -170,10 +170,10 @@ func (m *BucketManager) CreateBucket(bucketName string, regionID RegionID) error
 // DeleteBucket 删除一个七牛存储空间
 func (m *BucketManager) DeleteBucket(bucketName string) error {
 	ctx := auth.WithCredentials(context.Background(), m.Mac)
-	var reqHost string
 
+	var reqHost string
 	reqHost = m.Cfg.RsReqHost()
-	reqURL := fmt.Sprintf("%s/drop/%s", reqHost, EncodedEntryWithoutKey(bucketName))
+	reqURL := fmt.Sprintf("%s/drop/%s", reqHost, bucketName)
 	return m.Client.Call(ctx, nil, "POST", reqURL, nil)
 }
 
